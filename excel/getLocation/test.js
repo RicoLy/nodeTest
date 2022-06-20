@@ -16,33 +16,47 @@ const getLocation = async (locate, key = 'ebec68b8babdf0e0e66ecd377f82fc4b') => 
     method: 'get',
     url: `https://restapi.amap.com/v3/geocode/geo?address=${encodeURI(locate)}&key=${key}`,
   });
-  // .then(function (response) {
-  //   let res = response.data.geocodes
-  //   console.log(response.data.geocodes);
-  //   return res
-  // })
-  // .catch(function (error) {
-  //   console.log(error);
-  //   return error
-  // });
+    // .then(function (response) {
+    //   let res = response.data.geocodes
+    //   console.log(response.data.geocodes);
+    //   return res
+    // })
+    // .catch(function (error) {
+    //   console.log(error);
+    //   return error
+    // });
 }
 
+// const res = getLocation("龙华区景龙中环路大信花园3栋龙发路217号")
+//
+// res.then((response) => {
+//   let res = response.data.geocodes;
+//     console.log(response)
+//     console.log(response.data.geocodes);
+// })
+
 const getInfo = async (file) => {
-  const data = getData(file = './test2.xlsx');
+  const data = getData(file);
   const outPutData = [];
   for (const item of data) {
     console.log(item)
     // const res = getLocation(item.location)
-    if (item.name) {
+    if (item.name !== "" && item.location) {
       const res = await getLocation(item.location)
-      if (item.name) {
+      if (item.name && res.data.geocodes) {
+        const info = res.data.geocodes[0];
         outPutData.push({
-          district: item.district,
+          city: info.city,
+          district: info.district,
           name: item.name,
           location: item.location,
           phone: item.phone,
           intro: item.intro,
-          coordinate: res.data.geocodes[0].location,
+          privateRoom: item.privateRoom,
+          businessHours: item.businessHours,
+          traffic: item.traffic,
+          coordinate: info.location,
+          formattedAddress: info.formatted_address,
         })
       }
     }
@@ -59,17 +73,19 @@ const getInfo = async (file) => {
 //     const res = getLocation(item.location)
 //     res.then((response) => {
 //       if (response.data.geocodes[0]) {
-//         console.log("res====",response.data.geocodes[0]);
+//         const res = response.data.geocodes[0];
+//         console.log("res====",res);
 //         outPutData.push({
-//           district: item.district,
+//           city: res.city,
+//           district: res.district,
 //           name: item.name,
 //           location: item.location,
 //           phone: item.phone,
 //           intro: item.intro,
-//           coordinate: response.data.geocodes[0].location,
+//           coordinate: res.location,
+//           formattedAddress: res.formatted_address,
 //         })
 //       }
-//
 //     })
 //   }
 // })
@@ -79,7 +95,7 @@ const getInfo = async (file) => {
 const res = getInfo("./test2.xlsx")
 res.then((response) => {
   console.log("res====",response);
-  fs.writeFile('./info.json', JSON.stringify({infos: response}), (err) => {
+  fs.writeFile('./info2.json', JSON.stringify({infos: response}), (err) => {
     if (err) {
       throw err;
     }
